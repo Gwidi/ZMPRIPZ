@@ -2,7 +2,7 @@ import socket
 import constants
 
 # Konfiguracja
-HOST = '127.0.0.1'  # Nasłuchuj na wszystkich interfejsach sieciowych
+HOST = '150.254.46.80'  # Nasłuchuj na wszystkich interfejsach sieciowych
 PORT = 1025       # Port komunikacyjny (musi być taki sam w robocie)
 
 # Dane punktów
@@ -16,12 +16,12 @@ points = [
 ]
 
 def run_client():
-    print(f"Próba połączenia z robotem {ROBOT_IP}:{ROBOT_PORT}...")
+    print(f"Próba połączenia z robotem {HOST}:{PORT}...")
     
     try:
         # Tworzenie gniazda i próba połączenia
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.connect((ROBOT_IP, ROBOT_PORT))
+            s.connect((HOST, PORT))
             print("Połączono z robotem! (Robot jest w PSecond)")
             
             # Pętla wysyłania punktów

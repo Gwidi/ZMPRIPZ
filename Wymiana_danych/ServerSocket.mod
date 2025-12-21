@@ -1,14 +1,8 @@
 MODULE MainModule
-    ! --- Deklaracja Narzędzia i Obiektu Pracy ---
-    ! Pamiętaj: Te dane musisz zmierzyć/zdefiniować na swoim robocie!
-    ! Tutaj są wartości przykładowe (TCP na środku kołnierza, WObj w bazie)
-    PERS tooldata PointerTool := [TRUE, [[0,0,150],[1,0,0,0]], [1,[0,0,50],[1,0,0,0],0,0,0]];
-    PERS wobjdata Workobject_socket := [FALSE, TRUE, "", [[500,0,300],[1,0,0,0]], [[0,0,0],[1,0,0,0]]];
-
     ! --- Punkty Stałe ---
-    VAR robtarget PHome := [[0,0,0],[1,0,0,0],[0,0,0,0],[9E9,9E9,9E9,9E9,9E9,9E9]];
-    VAR robtarget PFirst := [[100,0,200],[1,0,0,0],[0,0,0,0],[9E9,9E9,9E9,9E9,9E9,9E9]]; 
-    VAR robtarget PSecond := [[300,0,300],[1,0,0,0],[0,0,0,0],[9E9,9E9,9E9,9E9,9E9,9E9]];
+    VAR robtarget PHome := [[-31.97,-72.53,-187.03],[0.975112,-0.0379626,0.0774618,-0.204241],[0,-1,-2,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    VAR robtarget PFirst := [[-36.56,-72.52,-86.14],[0.975104,-0.0379694,0.0774727,-0.204278],[0,-1,-2,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]]; 
+    VAR robtarget PSecond := [[-0.19,0.52,2.04],[0.975086,-0.0380104,0.0774439,-0.204363],[-1,-1,-2,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
     
     
     ! --- Zmienne komunikacyjne ---
@@ -16,7 +10,7 @@ MODULE MainModule
     VAR socketdev client_socket;
     VAR string received_str;
     VAR string send_ack := "ACK";
-    CONST string robot_ip := "127.0.0.1";
+    CONST string robot_ip := "150.254.46.80";
     CONST num robot_port := 1025;
     
     ! --- Zmienne pomocnicze ---
@@ -31,9 +25,9 @@ MODULE MainModule
 
     PROC Main()
         ! Start: Idź do PSecond i czekaj
-        MoveJ PHome, v1000, z50, PointerTool \WObj:=Workobject_socket;
-        MoveJ PFirst, v1000, z50, PointerTool \WObj:=Workobject_socket;
-        MoveL PSecond, v500, fine, PointerTool \WObj:=Workobject_socket;
+        MoveJ PHome, v1000, z50, Tooldata_1 \WObj:=wobj3;
+        MoveJ PFirst, v1000, z50, Tooldata_1 \WObj:=wobj3;
+        MoveL PSecond, v500, fine, Tooldata_1 \WObj:=wobj3;
         
         TPWrite "Oczekiwanie na wspolrzedne...";
 
@@ -63,7 +57,7 @@ MODULE MainModule
             ok := StrToVal(StrPart(received_str, comma2 + 1, len - comma2), val_z);
             
             ! --- Aktualizacja celu ---
-            ! Współrzędne z Pythona są teraz lokalne względem Workobject_socket!
+            ! Współrzędne z Pythona są teraz lokalne względem wobj3!
             P_var.trans.x := val_x;
             P_var.trans.y := val_y;
             P_var.trans.z := val_z;
@@ -71,16 +65,16 @@ MODULE MainModule
             ! --- TWÓJ SEKWENCYJNY RUCH (Approach -> Action -> Retract) ---
             
             ! 1. Dojazd 20mm nad punkt (szybko, strefa z20)
-            MoveL Offs(P_var,0,0,20), v100, z20, PointerTool \WObj:=Workobject_socket;
+            MoveL Offs(P_var,0,0,20), v100, z20, Tooldata_1 \WObj:=wobj3;
             
             ! 2. Zjazd do punktu (wolno, precyzyjnie 'fine')
             ! To jest moment, kiedy narzędzie dotyka punktu (np. P1, P2...)
-            MoveL P_var, v20, fine, PointerTool \WObj:=Workobject_socket;
+            MoveL P_var, v20, fine, Tooldata_1 \WObj:=wobj3;
             
             ! (Opcjonalnie: Tutaj można dodać WaitTime 0.5; jeśli to np. zgrzewanie lub chwytanie)
             
             ! 3. Odjazd 20mm nad punkt (szybko, strefa z20)
-            MoveL Offs(P_var,0,0,20), v100, z20, PointerTool \WObj:=Workobject_socket;
+            MoveL Offs(P_var,0,0,20), v100, z20, Tooldata_1 \WObj:=wobj3;
             
             ! --- Koniec sekwencji ---
             
@@ -91,8 +85,8 @@ MODULE MainModule
         SocketClose client_socket;
         SocketClose server_socket;
         
-        MoveL PSecond, v500, z50, PointerTool \WObj:=Workobject_socket;
-        MoveJ PHome, v1000, fine, PointerTool \WObj:=Workobject_socket;
+        MoveL PSecond, v500, z50, Tooldata_1 \WObj:=wobj3;
+        MoveJ PHome, v1000, fine, Tooldata_1 \WObj:=wobj3;
         
     ERROR
         IF ERRNO = ERR_SOCK_TIMEOUT OR ERRNO = ERR_SOCK_CLOSED THEN
